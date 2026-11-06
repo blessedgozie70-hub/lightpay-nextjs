@@ -1,83 +1,100 @@
-# LightPay
+* \# LightPay – Next.js Backend Integration Assignment
+* 
+* \*\*GitHub Repository:\*\* https://github.com/blessedgozie70-hub/lightpay-nextjs
+* 
+* \## Project Overview
+* 
+* LightPay is a digital payments application prototype built with Next.js. This assignment demonstrates Next.js App Router, server rendering, API routes, Supabase authentication, database integration, and Row Level Security (RLS).
+* 
+* \## 1. Next.js App Router and Shared Layout
+* 
+* The application uses the Next.js App Router. A shared root layout provides consistent navigation across the application.
+* 
+* The navigation includes Home, Login, Register, Dashboard, Notifications, SSG, and SSR.
+* 
+* \## 2. Static Site Generation (SSG) and Server-Side Rendering (SSR)
+* 
+* Two separate pages demonstrate the rendering approaches:
+* 
+* \- \*\*SSG (`/ssg`):\*\* Fetches data using caching and is configured to render statically during the production build.
+* \- \*\*SSR (`/ssr`):\*\* Fetches fresh data on each request using `force-dynamic` and `no-store`.
+* 
+* \*\*Difference:\*\* SSG generates the page at build time, while SSR generates the page on the server for each request. SSG is useful for content that does not change frequently, while SSR is useful when fresh data is required.
+* 
+* \## 3. API Routes
+* 
+* An API route was implemented at `/api/tasks`.
+* 
+* \- \*\*GET:\*\* Returns a JSON response confirming that the LightPay API is running.
+* \- \*\*POST:\*\* Accepts a task title, validates the submitted JSON, and returns the task when valid.
+* \- Invalid JSON and empty task titles return an HTTP 400 response.
+* 
+* The GET request, valid POST request, and invalid POST request were tested successfully.
+* 
+* \## 4. Supabase Authentication
+* 
+* Supabase authentication was integrated using `@supabase/supabase-js` and `@supabase/ssr`.
+* 
+* The application supports:
+* \- User registration.
+* \- Email confirmation.
+* \- User login using email and password.
+* \- Logout from the Notes page.
+* 
+* Registration and login were successfully tested with a real Supabase account.
+* 
+* \*\*Authentication vs Authorization\*\*
+* 
+* Authentication verifies the identity of a user — it answers the question, "Who are you?" Authorization determines what an authenticated user is allowed to access or do. In LightPay, Supabase authentication identifies users, while database permissions and RLS policies control access to their notes.
+* 
+* \## 5. Supabase Database and Row Level Security
+* 
+* A `notes` table was created in Supabase with the following fields:
+* 
+* \- `id`: Unique UUID for each note.
+* \- `user\_id`: The ID of the note's owner.
+* \- `title`: The note content.
+* \- `created\_at`: The date and time the note was created.
+* 
+* Row Level Security was enabled, with four policies:
+* 
+* 1\. SELECT: Users can read only their own notes.
+* 2\. INSERT: Users can insert notes only when the `user\_id` matches their authenticated ID.
+* 3\. UPDATE: Users can update only their own notes.
+* 4\. DELETE: Users can delete only their own notes.
+* 
+* The Notes page successfully retrieved existing records belonging to the signed-in account.
+* 
+* \*\*RLS testing result:\*\* RLS was enabled and all four policies were visible in the Supabase dashboard. However, a complete cross-account isolation test was not concluded. Therefore, I cannot claim that an attempt by a second user to access another user's records was successfully tested.
+* 
+* \## 6. AI-Assisted Code Review Notes
+* 
+* AI assistance was used to understand and review important parts of the backend integration.
+* 
+* Key concepts reviewed include:
+* 
+* \- `createBrowserClient`: Creates a Supabase client for browser-side authentication and database requests.
+* \- `supabase.auth.signUp()`: Registers a new user.
+* \- `supabase.auth.signInWithPassword()`: Authenticates a user with email and password.
+* \- `supabase.auth.getUser()`: Retrieves the currently authenticated user.
+* \- `useState`: Stores component state such as notes, input values, and messages.
+* \- `useEffect`: Loads notes when the Notes page is mounted.
+* \- `.from("notes").select()`: Retrieves records from the Supabase notes table.
+* \- `.insert()`, `.update()`, and `.delete()`: Perform database operations.
+* \- RLS policies: Enforce ownership restrictions at the database level.
+* 
+* \*\*Security observations:\*\*
+* 
+* \- The Supabase publishable key is used in the browser configuration; it is not a service-role secret.
+* \- `.env.local` is excluded through `.gitignore` and was not included in the GitHub upload.
+* \- The application supplies the authenticated user's ID when inserting a note, but client-side values should never be trusted as the security boundary. RLS must enforce ownership independently.
+* \- Error responses from authentication and database operations are displayed to the user.
+* 
+* The code was reviewed with AI assistance to improve understanding of the implementation. Further testing and review are still necessary before using this prototype in a production financial application.
+* 
+* \## 7. Conclusion
+* 
+* This assignment provided practical experience integrating Next.js with a backend service. I implemented routing, SSG, SSR, API endpoints, authentication, database operations, and RLS policies using Supabase.
+* 
+* \*\*Repository:\*\* https://github.com/blessedgozie70-hub/lightpay-nextjs
 
-LightPay is a responsive digital-payment **web app prototype** built with Next.js, React and JavaScript. It has an original royal-blue and yellow identity and is inspired by familiar fintech usability patterns, not a copy of any existing product.
-
-## Current features
-
-- Responsive dashboard with sample balance and monthly summaries
-- Show/hide balance control
-- Quick actions for transfers, bills, airtime and data
-- Simulated transfer and bill-payment flows with form validation
-- Transaction history, search, status filtering and transaction details
-- Wallet/card concept, notifications, profile/settings screens
-- Light theme with responsive mobile navigation
-- MySQL schema prepared for future backend work
-
-> **Important:** All data is mock data. Transfers and bill payments are simulations. No real money moves, no bank account is connected, and the displayed profile/account information is illustrative.
-
-## Requirements
-
-- Node.js 20.9 or newer
-- npm
-- Optional for later integration: MySQL 8+
-
-## Run locally
-
-```bash
-npm install
-npm run dev
-```
-
-Open http://localhost:3000.
-
-Create a production build with:
-
-```bash
-npm run build
-npm start
-```
-
-## Database setup command
-
-The database schema is kept in `database/schema.sql`.
-
-```bash
-mysql -u root -p < database/schema.sql
-```
-
-This creates the `lightpay` database and the initial `users`, `wallets`, `transactions`, and `audit_events` tables. You will be prompted for your local MySQL root password. For a shared or production environment, create a dedicated least-privilege database user rather than using root.
-
-An example environment file is provided at `.env.example`. Copy it to `.env.local` only when a backend/database connection is actually implemented. Never commit `.env.local` or real credentials.
-
-## Project structure
-
-```text
-lightpay-nextjs/
-├── app/
-│   ├── globals.css       # Brand styling and responsive layouts
-│   ├── layout.js         # Root layout and metadata
-│   └── page.js           # Interactive prototype screens and flows
-├── database/
-│   └── schema.sql        # MySQL schema and setup command
-├── .env.example
-├── .gitignore
-├── package.json
-└── README.md
-```
-
-## Suggested next implementation steps
-
-1. Split the single-page prototype into Next.js routes and reusable components.
-2. Add a server-side API and session-based authentication.
-3. Connect MySQL using a server-only database client and migrations.
-4. Add a payment provider's sandbox APIs for any real integration.
-5. Add automated tests, accessibility checks and deployment configuration.
-
-Do not store plaintext passwords, expose database credentials in client code, or treat a browser-only balance as a source of truth.
-
-
-## Theme and responsive navigation
-- LightPay uses royal blue `#4169E1` and yellow `#FFD447` as its primary brand colors.
-- Use the moon/sun button in the top bar, or the Appearance control in Profile & Settings, to switch between light and dark mode. The selection is saved in the browser.
-- The bottom navigation is displayed only on small mobile screens (650px and below). Desktop/tablet use the sidebar navigation.
-- The supplied project brief does not specify exact hexadecimal brand values, so these palette values are the implementation's chosen royal blue and yellow pair. If your team has an approved brand sheet, update the CSS variables in `app/globals.css`.
